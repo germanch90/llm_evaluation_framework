@@ -18,7 +18,9 @@ RUN if [ -f requirements-dev.txt ]; then pip install --no-cache-dir -r requireme
 # Copy application code
 COPY src/ ./src/
 COPY config/ ./config/
-COPY tests/ ./tests/
+
+# Create test directory for mounted volumes
+RUN mkdir -p tests
 
 # Create necessary directories
 RUN mkdir -p data/documents data/vector_db logs

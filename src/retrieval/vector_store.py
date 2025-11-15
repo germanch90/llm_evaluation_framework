@@ -6,7 +6,6 @@ import os
 from typing import Any, Dict, List, Optional
 
 import chromadb
-from chromadb.config import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,15 +23,21 @@ class ChromaDBVectorStore:
         collection_name: str = "rag_documents",
         persist_directory: Optional[str] = None,
         distance_metric: str = "cosine",
+        chroma_host: Optional[str] = None,
+        chroma_port: Optional[int] = None,
     ):
         """
         Initialize ChromaDB vector store.
 
         Args:
             collection_name: Name of the collection to work with
-            persist_directory: Path for persistent storage. If None, uses environment
-                             variable CHROMA_PERSIST_DIRECTORY or defaults to ./data/vector_db
+            persist_directory: Path for persistent storage (used if not connecting to remote)
+                             If None, uses environment variable CHROMA_PERSIST_DIRECTORY
+                             or defaults to ./data/vector_db
             distance_metric: Distance metric for similarity search (cosine, l2, ip)
+            chroma_host: ChromaDB server host (if using HTTP client)
+                        If provided, connects to remote ChromaDB instance
+            chroma_port: ChromaDB server port (default 8000)
 
         Raises:
             ValueError: If distance_metric is not supported
@@ -43,41 +48,48 @@ class ChromaDBVectorStore:
                 "Must be one of: cosine, l2, ip"
             )
 
-        # Set persist directory
-        if persist_directory is None:
-            persist_directory = os.getenv(
-                "CHROMA_PERSIST_DIRECTORY", "./data/vector_db"
-            )
-
-        # Create persist directory if it doesn't exist
-        os.makedirs(persist_directory, exist_ok=True)
-        self.persist_directory = persist_directory
         self.collection_name = collection_name
         self.distance_metric = distance_metric
 
-        # Initialize ChromaDB client with persistence
-        self.settings = Settings(
-            chroma_db_impl="duckdb+parquet",
-            persist_directory=persist_directory,
-            anonymized_telemetry=False,
-        )
-        self.client = chromadb.Client(self.settings)
+        # Initialize ChromaDB client
+        if chroma_host:
+            # Use HTTP client for remote connection
+            self.client = chromadb.HttpClient(
+                host=chroma_host,
+                port=chroma_port or 8000,
+            )
+            logger.info(
+                f"Connected to remote ChromaDB at {chroma_host}:{chroma_port or 8000}"
+            )
+        else:
+            # Use persistent local client
+            if persist_directory is None:
+                persist_directory = os.getenv(
+                    "CHROMA_PERSIST_DIRECTORY", "./data/vector_db"
+                )
 
-        # Get or create collection
+            # Create persist directory if it doesn't exist
+            os.makedirs(persist_directory, exist_ok=True)
+            self.persist_directory = persist_directory
+
+            # Use persistent local client
+            self.client = chromadb.PersistentClient(
+                path=persist_directory,
+            )
+            logger.info(
+                f"Initialized ChromaDB persistent client at {persist_directory}"
+            )
+
+        # Get or create collection with metric specification
         self.collection = self.client.get_or_create_collection(
             name=collection_name,
-            metadata={
-                "hnsw:space": distance_metric,
-                "hnsw:M": 16,
-                "hnsw:ef_construction": 200,
-            },
+            metadata={"hnsw:space": distance_metric},
         )
 
         logger.info(
             f"Initialized ChromaDB vector store - "
             f"collection: {collection_name}, "
-            f"metric: {distance_metric}, "
-            f"persist_dir: {persist_directory}"
+            f"metric: {distance_metric}"
         )
 
     def add(
@@ -334,10 +346,15 @@ class ChromaDBVectorStore:
         Retrieve all embeddings and metadata from the collection.
 
         Args:
-            include: Optional list of fields to include (ids, embeddings, documents, metadatas)
+            include: Optional list of fields to include (documents, embeddings, metadatas)
+                    Note: 'ids' is always included and doesn't need to be specified
 
         Returns:
-            Dictionary containing all embeddings and metadata
+            Dictionary containing all embeddings and metadata including:
+                - ids: All embedding IDs
+                - embeddings: All embedding vectors (if included)
+                - documents: All document chunks (if included)
+                - metadatas: All metadata (if included)
 
         Raises:
             Exception: If ChromaDB get operation fails
@@ -346,7 +363,10 @@ class ChromaDBVectorStore:
             include = ["embeddings", "documents", "metadatas"]
 
         try:
-            results = self.collection.get(include=include)
+            # Remove 'ids' from include if present - it's always returned
+            include_filtered = [i for i in include if i != "ids"]
+            
+            results = self.collection.get(include=include_filtered)
             logger.info(f"Retrieved all {len(results['ids'])} embeddings")
             return results
         except Exception as e:
@@ -357,14 +377,10 @@ class ChromaDBVectorStore:
         """
         Persist the collection to disk.
 
-        This ensures all data is written to the persist_directory.
+        Note: In ChromaDB 0.5.x+, data is automatically persisted when using
+        PersistentClient. This method is kept for API compatibility.
         """
-        try:
-            self.client.persist()
-            logger.info("Vector store persisted to disk")
-        except Exception as e:
-            logger.error(f"Error persisting vector store: {e}")
-            raise
+        logger.info("ChromaDB automatically persists data (no explicit action needed)")
 
     def clear(self) -> None:
         """

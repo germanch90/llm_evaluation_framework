@@ -262,11 +262,12 @@ class TestQuery:
     """Test query operation."""
 
     def test_query_empty_collection(self, vector_store):
-        """Test querying empty collection."""
+        """Test querying empty collection returns empty results."""
         query_embeddings = [[0.1, 0.2, 0.3, 0.4]]
         
-        with pytest.raises(Exception):
-            vector_store.query(query_embeddings=query_embeddings, top_k=5)
+        results = vector_store.query(query_embeddings=query_embeddings, top_k=5)
+        # ChromaDB returns empty results for empty collections, not an exception
+        assert len(results["ids"][0]) == 0
 
     def test_query_single_result(self, vector_store):
         """Test query returning single result."""
