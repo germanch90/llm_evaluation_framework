@@ -14,6 +14,7 @@ data/documents/*.pdf
 data/vector_db/
 logs/*.log
 .env
+ollama/
 
 # Testing
 .pytest_cache/

@@ -1,6 +1,58 @@
-version: '3.8'
-
 services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - 7869:11434
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    volumes:
+      - ${OLLAMA_MODELS_DIR:-/home/ollama/.ollama/models}:/root/.ollama/models
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    devices:
+      - /dev/nvidia0:/dev/nvidia0
+      - /dev/nvidiactl:/dev/nvidiactl
+      - /dev/nvidia-uvm:/dev/nvidia-uvm
+      - /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools
+      - /dev/dri/renderD128:/dev/dri/renderD128
+    networks:
+      - rag-network
+
+  ollama-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: ollama-webui
+    volumes:
+      - ./ollama/ollama-webui:/app/backend/data
+    depends_on:
+      - ollama
+    ports:
+      - 8081:8080
+    environment: # https://docs.openwebui.com/getting-started/env-configuration#default_models
+      - OLLAMA_BASE_URLS=http://ollama:11434          # stay inside network
+      - ENV=prod
+      - WEBUI_AUTH=True
+      - WEBUI_NAME=RAG Portfolio UI
+      - WEBUI_URL=https://rag-ui.local               # whatever reverse proxy uses
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:?set_me}
+      - DEFAULT_USER=admin@local
+      - DEFAULT_PASSWORD=${WEBUI_PASSWORD:?set_me}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rag-ui.rule=Host(`rag-ui.local`)"
+      - "traefik.http.routers.rag-ui.entrypoints=websecure"
+      - "traefik.http.routers.rag-ui.tls.certresolver=letsencrypt"
+      - "traefik.http.services.rag-ui.loadbalancer.server.port=8080"
+    restart: unless-stopped
+    networks:
+      - rag-network
+
   rag-api:
     build:
       context: .
@@ -13,13 +65,14 @@ services:
       - ./logs:/app/logs
       - ./config:/app/config
     environment:
-      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
       - CHROMA_PERSIST_DIRECTORY=/app/data/vector_db
     env_file:
       - .env
     command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
     depends_on:
       - chromadb
+      - ollama
     networks:
       - rag-network
 
@@ -48,11 +101,12 @@ services:
       - ./data:/app/data
     environment:
       - CHROMA_PERSIST_DIRECTORY=/app/data/vector_db
-      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://ollama:11434}
       - PYTHONPATH=/app
     command: pytest tests/ -v --tb=short
     depends_on:
       - chromadb
+      - ollama
     networks:
       - rag-network
 
