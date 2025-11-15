@@ -27,6 +27,7 @@ vector_db:
   type: "chromadb"
   collection_name: "rag_documents"
   distance_metric: "cosine"
+  persist_directory: "${CHROMA_PERSIST_DIRECTORY:-./data/vector_db}"
 
 evaluation:
   metrics:
