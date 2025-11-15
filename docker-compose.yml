@@ -48,12 +48,32 @@ services:
       - ./data:/app/data
     environment:
       - CHROMA_PERSIST_DIRECTORY=/app/data/vector_db
+      - OLLAMA_HOST=http://ollama:11434
       - PYTHONPATH=/app
     command: pytest tests/ -v --tb=short
     depends_on:
       - chromadb
+      - ollama
     networks:
       - rag-network
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - rag-network
+    # Optional: preload a model on startup
+    # command: ollama pull llama2
+
+volumes:
+  ollama_data:
+    driver: local
 
 networks:
   rag-network:
