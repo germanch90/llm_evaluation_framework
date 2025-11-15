@@ -97,6 +97,7 @@ class TestAsyncOllamaClientInit:
         assert client.ollama_host in [
             "http://localhost:11434",
             "http://host.docker.internal:11434",
+            "http://ollama:11434",
         ]
 
     def test_init_with_custom_params(self):
@@ -414,6 +415,7 @@ class TestPromptFormatting:
         ) as mock_post:
             mock_response = MagicMock()
             mock_response.json.return_value = {
+                "response": "Response with special: @#$%",
                 "message": {
                     "role": "assistant",
                     "content": "Response with special: @#$%",
@@ -525,6 +527,7 @@ class TestResponseParsing:
         full_response = {
             "model": "llama2:13b",
             "created_at": "2024-01-01T12:00:00.000000Z",
+            "response": "Full response",
             "message": {
                 "role": "assistant",
                 "content": "Full response",
@@ -554,6 +557,7 @@ class TestResponseParsing:
     async def test_parse_response_minimal_fields(self, llm_client):
         """Test parsing response with minimal fields."""
         minimal_response = {
+            "response": "Minimal",
             "message": {
                 "role": "assistant",
                 "content": "Minimal",
