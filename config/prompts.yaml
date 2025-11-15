@@ -1,0 +1,20 @@
+system_prompt: |
+  You are a helpful assistant that answers questions based on provided context.
+  Always ground your answers in the given context and cite sources when possible.
+
+rag_prompt_template: |
+  Context information is below:
+  ---------------------
+  {context}
+  ---------------------
+  
+  Given the context information above, please answer the following question.
+  If the answer cannot be found in the context, respond with "I cannot answer this question based on the provided context."
+  
+  Question: {query}
+  
+  Answer:
+
+no_context_prompt: |
+  I apologize, but I couldn't find relevant information in the document corpus to answer your question.
+  Please try rephrasing your question or ask about a different topic.

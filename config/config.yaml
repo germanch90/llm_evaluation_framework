@@ -1,0 +1,46 @@
+llm:
+  model: "llama3.1:8b"
+  temperature: 0.1
+  max_tokens: 512
+  timeout: 30
+
+embeddings:
+  model: "nomic-embed-text"
+  batch_size: 100
+
+chunking:
+  strategy: "recursive"
+  chunk_size: 512
+  chunk_overlap: 51
+  separators:
+    - "\n\n"
+    - "\n"
+    - ". "
+    - " "
+    - ""
+
+retrieval:
+  top_k: 5
+  score_threshold: 0.5
+
+vector_db:
+  type: "chromadb"
+  collection_name: "rag_documents"
+  distance_metric: "cosine"
+
+evaluation:
+  metrics:
+    answer_relevancy:
+      threshold: 0.7
+    faithfulness:
+      threshold: 0.8
+    contextual_relevancy:
+      threshold: 0.6
+  
+  performance:
+    max_latency_seconds: 5.0
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/rag.log"
