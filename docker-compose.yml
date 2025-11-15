@@ -56,11 +56,6 @@ services:
     networks:
       - rag-network
 
-
-volumes:
-  # Note: Ollama models are stored on host at /home/ollama/.ollama (39GB+)
-  # Docker containers access via OLLAMA_HOST=http://host.docker.internal:11434
-
 networks:
   rag-network:
     driver: bridge

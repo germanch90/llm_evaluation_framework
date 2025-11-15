@@ -133,14 +133,13 @@ class TestFormatRagPrompt:
         assert "quotes" in result
 
     def test_format_rag_prompt_empty_context(self, prompts_config_file):
-        """Test RAG prompt with empty context."""
+        """Test RAG prompt with empty context raises error."""
         manager = PromptManager(config_path=prompts_config_file)
-        result = manager.format_rag_prompt(
-            query="Question?",
-            context="",
-        )
-
-        assert "Question?" in result
+        with pytest.raises(ValueError, match="context cannot be empty"):
+            manager.format_rag_prompt(
+                query="Question?",
+                context="",
+            )
 
 
 class TestFormatSystemPrompt:
@@ -189,10 +188,10 @@ class TestFormatNoContextPrompt:
         assert "@#$%" in result
 
     def test_format_no_context_prompt_empty_query(self, prompts_config_file):
-        """Test no-context prompt with empty query."""
+        """Test no-context prompt with empty query raises error."""
         manager = PromptManager(config_path=prompts_config_file)
-        result = manager.format_no_context_prompt(query="")
-        assert isinstance(result, str)
+        with pytest.raises(ValueError, match="query cannot be empty"):
+            manager.format_no_context_prompt(query="")
 
 
 class TestCustomPromptFormatting:
@@ -201,7 +200,7 @@ class TestCustomPromptFormatting:
     def test_custom_prompt_with_available_template(self, prompts_config_file):
         """Test custom prompt formatting with available template."""
         manager = PromptManager(config_path=prompts_config_file)
-        result = manager.custom_prompt(
+        result = manager.format_custom_prompt(
             template_name="custom_template",
             language="Spanish",
             text="Hello world",
@@ -214,7 +213,7 @@ class TestCustomPromptFormatting:
         """Test custom prompt with missing template raises error."""
         manager = PromptManager(config_path=prompts_config_file)
         with pytest.raises(KeyError):
-            manager.custom_prompt(
+            manager.format_custom_prompt(
                 template_name="nonexistent_template",
                 some_var="value",
             )
@@ -223,7 +222,7 @@ class TestCustomPromptFormatting:
         """Test custom prompt with missing template variables raises error."""
         manager = PromptManager(config_path=prompts_config_file)
         with pytest.raises(KeyError):
-            manager.custom_prompt(
+            manager.format_custom_prompt(
                 template_name="custom_template",
                 # Missing required 'language' and 'text'
             )
@@ -231,7 +230,7 @@ class TestCustomPromptFormatting:
     def test_custom_prompt_extra_variables_ignored(self, prompts_config_file):
         """Test custom prompt ignores extra variables."""
         manager = PromptManager(config_path=prompts_config_file)
-        result = manager.custom_prompt(
+        result = manager.format_custom_prompt(
             template_name="custom_template",
             language="French",
             text="Bonjour",
@@ -244,7 +243,7 @@ class TestCustomPromptFormatting:
     def test_custom_prompt_with_system_template(self, prompts_config_file):
         """Test custom prompt can access standard templates."""
         manager = PromptManager(config_path=prompts_config_file)
-        result = manager.custom_prompt(template_name="system")
+        result = manager.format_custom_prompt(template_name="system")
         assert isinstance(result, str)
         assert len(result) > 0
 
@@ -289,7 +288,7 @@ class TestTemplateValidation:
             yaml.dump(templates_with_escaped, f)
 
         manager = PromptManager(config_path=config_path)
-        result = manager.custom_prompt(
+        result = manager.format_custom_prompt(
             template_name="escaped",
             variable="test",
         )

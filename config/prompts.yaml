@@ -1,8 +1,8 @@
-system_prompt: |
+system: |
   You are a helpful assistant that answers questions based on provided context.
   Always ground your answers in the given context and cite sources when possible.
 
-rag_prompt_template: |
+rag: |
   Context information is below:
   ---------------------
   {context}
@@ -15,6 +15,11 @@ rag_prompt_template: |
   
   Answer:
 
-no_context_prompt: |
+no_context: |
   I apologize, but I couldn't find relevant information in the document corpus to answer your question.
   Please try rephrasing your question or ask about a different topic.
+
+custom_template: |
+  Translate the following text to {language}:
+  {text}
+

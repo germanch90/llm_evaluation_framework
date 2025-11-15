@@ -128,6 +128,30 @@ class AsyncOllamaClient:
 
         return await self._generate_with_retry(prompt, temp, tokens)
 
+    def _extract_token_usage(self, response: dict) -> TokenUsage:
+        """
+        Extract token usage from Ollama response.
+
+        Args:
+            response: Raw Ollama API response
+
+        Returns:
+            TokenUsage object with token counts
+
+        Raises:
+            KeyError: If required fields are missing or malformed
+        """
+        # Extract token counts (Ollama v0.5.x format)
+        prompt_tokens = response.get("prompt_eval_count", 0)
+        completion_tokens = response.get("eval_count", 0)
+        total_tokens = prompt_tokens + completion_tokens
+
+        return TokenUsage(
+            prompt_tokens=int(prompt_tokens),
+            completion_tokens=int(completion_tokens),
+            total_tokens=int(total_tokens),
+        )
+
     async def _generate_with_retry(
         self,
         prompt: str,
@@ -238,10 +262,11 @@ class AsyncOllamaClient:
             logger.warning("Ollama returned empty response")
             answer = ""
 
-        # Extract token counts (Ollama v0.5.x format)
-        prompt_tokens = result.get("prompt_eval_count", 0)
-        completion_tokens = result.get("eval_count", 0)
-        total_tokens = prompt_tokens + completion_tokens
+        # Extract token counts using helper method
+        token_usage = self._extract_token_usage(result)
+        prompt_tokens = token_usage.prompt_tokens
+        completion_tokens = token_usage.completion_tokens
+        total_tokens = token_usage.total_tokens
 
         generation_time_ms = (time.time() - start_time) * 1000
 
@@ -253,11 +278,7 @@ class AsyncOllamaClient:
 
         return LLMResponse(
             answer=answer,
-            token_usage=TokenUsage(
-                prompt_tokens=prompt_tokens,
-                completion_tokens=completion_tokens,
-                total_tokens=total_tokens,
-            ),
+            token_usage=token_usage,
             generation_time_ms=generation_time_ms,
             model=self.model_name,
         )
