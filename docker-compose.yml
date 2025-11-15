@@ -35,6 +35,26 @@ services:
     networks:
       - rag-network
 
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-test
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./config:/app/config
+      - ./data:/app/data
+    environment:
+      - CHROMA_PERSIST_DIRECTORY=/app/data/vector_db
+      - PYTHONPATH=/app
+    command: pytest tests/ -v --tb=short
+    depends_on:
+      - chromadb
+    networks:
+      - rag-network
+
 networks:
   rag-network:
     driver: bridge

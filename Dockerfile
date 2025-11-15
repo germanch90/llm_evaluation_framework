@@ -9,12 +9,16 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY requirements.txt .
+COPY requirements.txt requirements-dev.txt* ./
+
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+RUN if [ -f requirements-dev.txt ]; then pip install --no-cache-dir -r requirements-dev.txt; fi
 
 # Copy application code
 COPY src/ ./src/
 COPY config/ ./config/
+COPY tests/ ./tests/
 
 # Create necessary directories
 RUN mkdir -p data/documents data/vector_db logs
