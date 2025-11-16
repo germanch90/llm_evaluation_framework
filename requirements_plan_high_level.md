@@ -20,7 +20,7 @@ Build a production-quality RAG system with comprehensive testing using deepeval 
 
 ---
 
-## Phase 1: Core RAG Pipeline
+## Component: Core RAG Pipeline
 
 ### 1.1 Vector Store Implementation
 - [x] Implement ChromaDB wrapper with CRUD operations
@@ -45,16 +45,16 @@ Build a production-quality RAG system with comprehensive testing using deepeval 
 - [x] Create CLI interface for testing
 
 ### 1.4 Document Ingestion Flow
-- [ ] Create ingestion script to process KG-RAG PDFs
-- [ ] Load → Chunk → Embed → Store pipeline
-- [ ] Log statistics (docs, chunks, embeddings)
-- [ ] Handle batch processing
+- [x] Create ingestion script to process KG-RAG PDFs
+- [x] Load → Chunk → Embed → Store pipeline
+- [x] Log statistics (docs, chunks, embeddings)
+- [x] Handle batch processing
 
 **Deliverable**: Working RAG system that answers questions from ingested documents
 
 ---
 
-## Phase 2: DeepEval Test Suite
+## Component: DeepEval Test Suite
 
 ### 2.1 Test Data Preparation
 - [ ] Parse KG-RAG dataset Q&A files
@@ -90,15 +90,15 @@ Build a production-quality RAG system with comprehensive testing using deepeval 
 
 ---
 
-## Phase 3: API & Interface
+## Component: API & Interface
 
 ### 3.1 FastAPI Implementation
-- [ ] Implement `/query` endpoint
+- [x] Implement `/query` endpoint
   - Input: query string, optional top_k
   - Output: answer, sources, metadata, latency
-- [ ] Add `/health` endpoint
+- [x] Add `/health` endpoint
 - [ ] Add `/ingest` endpoint (upload PDFs)
-- [ ] Implement request validation (Pydantic)
+- [x] Implement request validation (Pydantic)
 - [ ] Add OpenAPI documentation
 - [ ] Configure CORS
 
@@ -119,7 +119,7 @@ Build a production-quality RAG system with comprehensive testing using deepeval 
 
 ---
 
-## Phase 4: Docker Deployment
+## Component: Docker Deployment
 
 ### 4.1 Container Setup
 - [ ] Test Docker Compose configuration
