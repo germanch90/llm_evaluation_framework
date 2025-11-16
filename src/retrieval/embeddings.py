@@ -2,7 +2,9 @@
 Embedding generation using Ollama.
 """
 import logging
+import os
 from typing import List
+
 import requests
 
 logger = logging.getLogger(__name__)
@@ -10,20 +12,25 @@ logger = logging.getLogger(__name__)
 
 class EmbeddingModel:
     """Generate embeddings using Ollama."""
-    
-    def __init__(self, model_name: str = "nomic-embed-text", ollama_host: str = "http://localhost:11434"):
+
+    def __init__(
+        self,
+        model_name: str = "nomic-embed-text",
+        ollama_host: str | None = None,
+    ):
         """
         Initialize embedding model.
-        
+
         Args:
             model_name: Name of the Ollama embedding model
-            ollama_host: URL of Ollama server
+            ollama_host: URL of Ollama server (defaults to OLLAMA_HOST env var)
         """
         self.model_name = model_name
-        self.ollama_host = ollama_host
-        self.api_url = f"{ollama_host}/api/embeddings"
-        
-        logger.info(f"Initialized embedding model: {model_name}")
+        resolved_host = ollama_host or os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        self.ollama_host = resolved_host.rstrip("/")
+        self.api_url = f"{self.ollama_host}/api/embeddings"
+
+        logger.info("Initialized embedding model: %s (host=%s)", model_name, self.ollama_host)
     
     def embed_text(self, text: str) -> List[float]:
         """

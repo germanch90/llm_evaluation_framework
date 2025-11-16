@@ -23,26 +23,26 @@ Build a production-quality RAG system with comprehensive testing using deepeval 
 ## Phase 1: Core RAG Pipeline
 
 ### 1.1 Vector Store Implementation
-- [ ] Implement ChromaDB wrapper with CRUD operations
-- [ ] Configure collection with cosine similarity
-- [ ] Add batch insertion for efficiency
-- [ ] Implement persistence to disk
-- [ ] Add metadata filtering capability
+- [x] Implement ChromaDB wrapper with CRUD operations
+- [x] Configure collection with cosine similarity
+- [x] Add batch insertion for efficiency
+- [x] Implement persistence to disk
+- [x] Add metadata filtering capability
 
 ### 1.2 LLM Client
-- [ ] Create Ollama client for llama3.1:8b
-- [ ] Implement prompt template system
-- [ ] Add temperature and token limit controls
-- [ ] Handle timeouts and retries
-- [ ] Track token usage
+- [x] Create Ollama client for llama3.1:8b
+- [x] Implement prompt template system
+- [x] Add temperature and token limit controls
+- [x] Handle timeouts and retries
+- [x] Track token usage
 
 ### 1.3 RAG Pipeline Integration
-- [ ] Build end-to-end pipeline class
-- [ ] Chain: query → embed → retrieve → generate
-- [ ] Add logging at each stage
-- [ ] Implement error handling
-- [ ] Track latency metrics
-- [ ] Create CLI interface for testing
+- [x] Build end-to-end pipeline class
+- [x] Chain: query → embed → retrieve → generate
+- [x] Add logging at each stage
+- [x] Implement error handling
+- [x] Track latency metrics
+- [x] Create CLI interface for testing
 
 ### 1.4 Document Ingestion Flow
 - [ ] Create ingestion script to process KG-RAG PDFs

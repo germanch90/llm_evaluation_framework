@@ -18,6 +18,7 @@ RUN if [ -f requirements-dev.txt ]; then pip install --no-cache-dir -r requireme
 # Copy application code
 COPY src/ ./src/
 COPY config/ ./config/
+COPY scripts/ ./scripts/
 
 # Create test directory for mounted volumes
 RUN mkdir -p tests
