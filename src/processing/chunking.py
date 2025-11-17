@@ -3,7 +3,10 @@ Text chunking strategies.
 """
 import logging
 from typing import List, Dict, Any
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+try:
+    from langchain_text_splitters import RecursiveCharacterTextSplitter
+except ImportError:  # fallback for older langchain versions
+    from langchain.text_splitter import RecursiveCharacterTextSplitter  # type: ignore
 
 logger = logging.getLogger(__name__)
 

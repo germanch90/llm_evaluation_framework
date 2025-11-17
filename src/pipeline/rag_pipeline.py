@@ -58,7 +58,7 @@ class RAGPipeline:
         vector_store: Optional[ChromaDBVectorStore] = None,
         llm_client: Optional[AsyncOllamaClient] = None,
         prompt_manager: Optional[PromptManager] = None,
-        top_k: int = 5,
+        top_k: int = 15,
     ) -> None:
         self.document_loader = document_loader or DocumentLoader()
         self.chunker = chunker or DocumentChunker()
@@ -110,11 +110,12 @@ class RAGPipeline:
             metrics["embed_ms"] = (time.perf_counter() - embed_start) * 1000
 
             store_start = time.perf_counter()
-            self.vector_store.add(
+            self.vector_store.add_batch(
                 embeddings=embeddings,
                 metadatas=[chunk.metadata for chunk in chunks],
                 documents=[chunk.text for chunk in chunks],
                 ids=[chunk.chunk_id for chunk in chunks],
+                batch_size=5000,
             )
             metrics["store_ms"] = (time.perf_counter() - store_start) * 1000
 

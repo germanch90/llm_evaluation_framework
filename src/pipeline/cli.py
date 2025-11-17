@@ -47,6 +47,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Number of chunks to retrieve",
     )
 
+    subparsers.add_parser("clear", help="Delete all embeddings from the vector store")
+
     return parser
 
 
@@ -77,6 +79,16 @@ def main() -> None:
         cmd_ingest(pipeline, args.input)
     elif args.command == "query":
         cmd_query(pipeline, args.question, args.top_k)
+    elif args.command == "clear":
+        confirm = input(
+            "This will delete all embeddings from the vector store. "
+            "Type 'DELETE' to confirm: "
+        )
+        if confirm.strip().upper() != "DELETE":
+            print("Aborted.")
+            return
+        pipeline.vector_store.clear()
+        print("Vector store cleared.")
     else:
         parser.error(f"Unknown command {args.command}")
 

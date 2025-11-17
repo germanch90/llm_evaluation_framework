@@ -67,11 +67,11 @@ Build a production-quality RAG system with comprehensive testing using deepeval 
 - [ ] Add edge cases (unanswerable questions)
 
 ### 2.2 Core Metrics Implementation
-- [ ] **Answer Relevancy** (threshold: 0.7)
+- [x] **Answer Relevancy** (threshold: 0.7)
   - Does answer address the query?
-- [ ] **Faithfulness** (threshold: 0.8)
+- [x] **Faithfulness** (threshold: 0.8)
   - Is answer grounded in context?
-- [ ] **Contextual Relevancy** (threshold: 0.6)
+- [x] **Contextual Relevancy** (threshold: 0.6)
   - Are retrieved chunks relevant?
 
 ### 2.3 Custom Metrics

@@ -68,10 +68,18 @@ pip install -r requirements.txt -r requirements-dev.txt
 
 1. Prepare a directory of PDFs (e.g., copy a subset into `data/demo-docs/`).
 2. Run the ingestion CLI inside the container:
-   ```bash
-   docker compose exec rag-api python -m src.pipeline.cli ingest --input data/demo-docs
-   ```
-   This loads documents, chunks them, generates embeddings via Ollama, and stores them in Chroma (`./data/vector_db`).
+  ```bash
+  docker compose exec rag-api python -m src.pipeline.cli ingest --input data/demo-docs
+  ```
+  This loads documents, chunks them, generates embeddings via Ollama, and stores them in Chroma (`./data/vector_db`).
+
+### Clear Vector Store
+
+```bash
+docker compose exec rag-api python -m src.pipeline.cli clear
+```
+
+You’ll be prompted to confirm before all embeddings are deleted.
 
 ### Query the Pipeline
 
@@ -108,6 +116,41 @@ docker compose exec rag-api env PYTHONPATH=/app python scripts/prepare_test_data
   --dataset-root data/kg-rag-dataset \
   --output data/test_cases.json \
   --per-difficulty 8 --max-total 24
+```
+
+### Run DeepEval Metrics
+
+> Configure provider API keys in `.env` (e.g., `OPENAI_API_KEY`, `GOOGLE_API_KEY`).
+
+```bash
+# OpenAI example
+docker compose exec rag-api env PYTHONPATH=/app OPENAI_API_KEY=$OPENAI_API_KEY \
+  python scripts/run_deepeval.py \
+    --test-cases data/test_cases.json \
+    --eval-provider openai \
+    --eval-model gpt-4o-mini
+
+# Ollama example (uses local Llama for scoring)
+docker compose exec rag-api env PYTHONPATH=/app \
+  python scripts/run_deepeval.py \
+    --test-cases data/test_cases.json \
+    --eval-provider ollama \
+    --eval-model llama3.1:8b \
+    --ollama-host http://ollama:11434
+
+# Google Gemini example
+docker compose exec rag-api env PYTHONPATH=/app GOOGLE_API_KEY=$GOOGLE_API_KEY \
+  python scripts/run_deepeval.py \
+    --test-cases data/test_cases.json \
+    --eval-provider google \
+    --eval-model gemini-2.5-flash-lite
+
+# Groq example
+docker compose exec rag-api env PYTHONPATH=/app GROQ_API_KEY=$GROQ_API_KEY \
+  python scripts/run_deepeval.py \
+    --test-cases data/test_cases.json \
+    --eval-provider groq \
+    --eval-model llama-3.1-70b-versatile
 ```
 
 ### Run Tests
