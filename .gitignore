@@ -10,10 +10,7 @@ ENV/
 .venv
 
 # Project specific
-data/documents/*.pdf
-data/vector_db/
-data/kg-rag-dataset/
-data/demo-docs
+data/
 logs/*.log
 .env
 ollama/

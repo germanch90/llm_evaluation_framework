@@ -57,13 +57,13 @@ Build a production-quality RAG system with comprehensive testing using deepeval 
 ## Component: DeepEval Test Suite
 
 ### 2.1 Test Data Preparation
-- [ ] Parse KG-RAG dataset Q&A files
-- [ ] Convert to test case format (JSON)
-- [ ] Select 20-30 questions across difficulty levels:
+- [x] Parse KG-RAG dataset Q&A files
+- [x] Convert to test case format (JSON)
+- [x] Select 20-30 questions across difficulty levels:
   - Single-doc, single-chunk (easy)
   - Single-doc, multi-chunk (medium)
   - Multi-doc (hard)
-- [ ] Include ground truth answers
+- [x] Include ground truth answers
 - [ ] Add edge cases (unanswerable questions)
 
 ### 2.2 Core Metrics Implementation
